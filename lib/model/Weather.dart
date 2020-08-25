@@ -1,5 +1,5 @@
 
-import 'package:weather_app/model/Media.dart';
+import 'package:weather_app/model/Main.dart';
 
 class Weather {
   int id;
