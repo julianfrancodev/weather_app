@@ -19,8 +19,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  Weather _weather;
-  Main _mainWeather;
   Future<Weather> futureWeather;
 
   @override
@@ -42,7 +40,7 @@ class _HomeState extends State<Home> {
             Container(
               decoration: BoxDecoration(
                   image: DecorationImage(
-                      image: AssetImage('assets/images/image1.jpg'),
+                      image: AssetImage('assets/images/image2.jpg'),
                       fit: BoxFit.cover)),
               child: Container(
                 decoration: BoxDecoration(
@@ -53,11 +51,10 @@ class _HomeState extends State<Home> {
                     ])),
               ),
             ),
-
             Container(
               height: double.infinity,
+              margin: EdgeInsets.symmetric(vertical: 30),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -66,14 +63,26 @@ class _HomeState extends State<Home> {
                         future: futureWeather,
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
-                            return Text(snapshot.data.name, style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 40,
-                                color: Colors.white),);
+                            return Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on_outlined,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                                Text(
+                                  snapshot.data.name,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 22,
+                                      color: Colors.white),
+                                ),
+                              ],
+                            );
                           } else if (snapshot.hasError) {
                             return Text("${snapshot.error}");
                           }
-                          return CircularProgressIndicator();
+                          return Container();
                         },
                       ),
                     ],
@@ -81,36 +90,40 @@ class _HomeState extends State<Home> {
                   SizedBox(
                     height: 10,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.ac_unit,
-                        color: Colors.white,
-                      ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      FutureBuilder(
-                        future: futureWeather,
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            return Text("${_celsiusParser(snapshot.data.main.temp)}" + "\u2103",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 22,
-                                  color: Colors.white),);
-                          } else if (snapshot.hasError) {
-                            return Text("${snapshot.error}");
-                          }
-                          return CircularProgressIndicator();
-                        },
-                      ),
-                    ],
-                  ),
                 ],
               ),
-            )
+            ),
+
+            FutureBuilder(
+              future: futureWeather,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "${_celsiusParser(snapshot.data.main.temp)}" +
+                                  "\u00B0",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 60,
+                                  color: Colors.white),
+                            ),
+                          ]),
+                      Text("Lluvia",
+                        style: TextStyle(fontSize: 20, color: Colors.white),)
+                    ],
+                  );
+                } else if (snapshot.hasError) {
+                  return Text("${snapshot.error}");
+                }
+                return Container();
+              },
+            ),
+
           ],
         ));
   }
