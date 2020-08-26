@@ -21,37 +21,16 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   Weather _weather;
   Main _mainWeather;
+  Future<Weather> futureWeather;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    loadWeather();
+    futureWeather = HttpHandler().fetchWeather();
   }
 
-  void loadWeather() async {
-    var weather = await HttpHandler().fetchWeather();
-    print(weather.name);
-    print(weather.main.temp);
-    print(weather.main.temp_max);
-    print(weather.main.humidity);
-    print(weather.main.temp_min);
-
-    setState(() {
-      _mainWeather = new Main(
-          sea_level: weather.main.sea_level,
-          humidity: weather.main.humidity,
-          temp_max: weather.main.temp_max,
-          temp_min: weather.main.temp_min,
-          temp: weather.main.temp,
-          presure: weather.main.presure,
-          feels_like: weather.main.feels_like);
-      _weather =
-          new Weather(id: weather.id, name: weather.name, main: _mainWeather);
-    });
-  }
-
-  double _celsiusParser(double kelvin){
+  double _celsiusParser(double kelvin) {
     return (kelvin - 273.15).roundToDouble();
   }
 
@@ -59,58 +38,80 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Stack(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage('assets/images/image1.jpg'),
-                  fit: BoxFit.cover)),
-          child: Container(
-            decoration: BoxDecoration(
-                gradient: LinearGradient(begin: Alignment.bottomRight, colors: [
-              Colors.black.withOpacity(.9),
-              Colors.black.withOpacity(.4),
-            ])),
-          ),
-        ),
-        Container(
-          height: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _weather.name,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 40,
-                        color: Colors.white),
-                  )
-                ],
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage('assets/images/image1.jpg'),
+                      fit: BoxFit.cover)),
+              child: Container(
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        begin: Alignment.bottomRight, colors: [
+                      Colors.black.withOpacity(.9),
+                      Colors.black.withOpacity(.4),
+                    ])),
               ),
-              SizedBox(height: 10,),
-              Row(
+            ),
+
+            Container(
+              height: double.infinity,
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.ac_unit,color: Colors.white,),
-                  SizedBox(
-                    width: 5,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FutureBuilder(
+                        future: futureWeather,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Text(snapshot.data.name, style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 40,
+                                color: Colors.white),);
+                          } else if (snapshot.hasError) {
+                            return Text("${snapshot.error}");
+                          }
+                          return CircularProgressIndicator();
+                        },
+                      ),
+                    ],
                   ),
-                  Text(
-                    '${_celsiusParser(_weather.main.temp)}',
-                    style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  )
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.ac_unit,
+                        color: Colors.white,
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      FutureBuilder(
+                        future: futureWeather,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            return Text("${_celsiusParser(snapshot.data.main.temp)}" + "\u2103",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 22,
+                                  color: Colors.white),);
+                          } else if (snapshot.hasError) {
+                            return Text("${snapshot.error}");
+                          }
+                          return CircularProgressIndicator();
+                        },
+                      ),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
-        )
-      ],
-    ));
+            )
+          ],
+        ));
   }
 }
